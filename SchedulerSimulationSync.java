@@ -28,6 +28,7 @@ class Colors {
     public static final String BRIGHT_GREEN = "\u001B[92m";
 }
 
+
 // ⚠️ SHARED RESOURCES - These need synchronization! ⚠️
 class SharedResources {
     // TODO: Students will add synchronization mechanisms here
