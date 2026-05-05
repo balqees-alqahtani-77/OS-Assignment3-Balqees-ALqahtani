@@ -333,6 +333,186 @@ public class SchedulerSimulationSync {
             }
             
             Process process = processMap.get(currentThread);
+                } catch (InterruptedException e) {
+                    System.out.println(Colors.RED + "\n  ✗ " + name + " was interrupted." + Colors.RESET);
+                }
+                
+                remainingTime -= runTime;
+                int overallProgress = (int) (((double)(burstTime - remainingTime) / burstTime) * 100);
+                String overallProgressBar = createProgressBar(overallProgress, 20);
+                
+                System.out.println(Colors.YELLOW + "  ⏸ " + Colors.CYAN + name + Colors.RESET + 
+                                  " completed quantum " + Colors.BRIGHT_YELLOW + runTime + "ms" + Colors.RESET + 
+                                  " │ Overall progress: " + overallProgressBar);
+                System.out.println(Colors.MAGENTA + "     Remaining time: " + remainingTime + "ms" + Colors.RESET);
+                
+                if (remainingTime > 0) {
+                    System.out.println(Colors.BLUE + "  ↻ " + Colors.CYAN + name + Colors.RESET + 
+                                      " yields CPU for context switch" + Colors.RESET);
+                    SharedResources.logExecution(name + " yielded CPU");
+                } else {
+                    completionTime = System.currentTimeMillis();
+                    long waitingTime = (completionTime - creationTime) - burstTime;
+                    SharedResources.addWaitingTime(waitingTime);
+                    SharedResources.incrementCompletedProcess();
+                    SharedResources.logExecution(name + " completed execution");
+                    System.out.println(Colors.BRIGHT_GREEN + "  ✓ " + Colors.BOLD + Colors.CYAN + name + 
+                                      Colors.RESET + Colors.BRIGHT_GREEN + " finished execution!" + 
+                                      Colors.RESET);
+                }
+                System.out.println();
+                
+            } finally {
+                SharedResources.cpuSemaphore.release();
+            }
+        } catch (InterruptedException e) {
+            System.out.println(Colors.RED + "  ✗ " + name + " semaphore interrupted." + Colors.RESET);
+        }
+    }
+    
+    private String createProgressBar(int progress, int width) {
+        int filled = (progress * width) / 100;
+        StringBuilder bar = new StringBuilder("[");
+        for (int i = 0; i < width; i++) {
+            if (i < filled) {
+                bar.append(Colors.GREEN + "█" + Colors.RESET);
+            } else {
+                bar.append(Colors.WHITE + "░" + Colors.RESET);
+            }
+        }
+        bar.append("] ").append(progress).append("%");
+        return bar.toString();
+    }
+    
+    public void runToCompletion() {
+        try {
+            SharedResources.cpuSemaphore.acquire();
+            try {
+                System.out.println(Colors.BRIGHT_CYAN + "  ⚡ " + Colors.BOLD + Colors.CYAN + name + 
+                                  Colors.RESET + Colors.BRIGHT_CYAN + " is the last process, running to completion" + 
+                                  Colors.RESET + " [" + remainingTime + "ms]");
+                Thread.sleep(remainingTime);
+                remainingTime = 0;
+                completionTime = System.currentTimeMillis();
+                
+                long waitingTime = (completionTime - creationTime) - burstTime;
+                SharedResources.addWaitingTime(waitingTime);
+                SharedResources.incrementCompletedProcess();
+                
+                System.out.println(Colors.BRIGHT_GREEN + "  ✓ " + Colors.BOLD + Colors.CYAN + name + 
+                                  Colors.RESET + Colors.BRIGHT_GREEN + " finished execution!" + Colors.RESET);
+                System.out.println();
+            } finally {
+                SharedResources.cpuSemaphore.release();
+            }
+        } catch (InterruptedException e) {
+            System.out.println(Colors.RED + "  ✗ " + name + " was interrupted." + Colors.RESET);
+        }
+    }
+    
+    public String getName() { return name; }
+    public int getBurstTime() { return burstTime; }
+    public int getRemainingTime() { return remainingTime; }
+    public int getPriority() { return priority; }
+    public boolean isFinished() { return remainingTime <= 0; }
+    
+    public long getWaitingTime() {
+        if (completionTime > 0) {
+            return (completionTime - creationTime) - burstTime;
+        }
+        return 0;
+    }
+}
+
+public class SchedulerSimulationSync {
+    public static void main(String[] args) {
+        int studentID = 45554474;
+        Random random = new Random(studentID);
+        
+        int timeQuantum = 2000 + random.nextInt(4) * 1000;
+        int numProcesses = 10 + random.nextInt(11);
+        
+        Queue<Thread> processQueue = new LinkedList<>();
+        Map<Thread, Process> processMap = new HashMap<>();
+        List<Process> allProcesses = new ArrayList<>();
+        
+        System.out.println("\n" + Colors.BOLD + Colors.BRIGHT_CYAN + 
+                          "╔═══════════════════════════════════════════════════════════════════════════════════════╗" + 
+                          Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET + 
+                          Colors.BG_BLUE + Colors.BRIGHT_WHITE + Colors.BOLD + 
+                          "              CPU SCHEDULER SIMULATION WITH SYNCHRONIZATION                       " + 
+                          Colors.RESET + Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + 
+                          "╠═══════════════════════════════════════════════════════════════════════════════════════╣" + 
+                          Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET + 
+                          Colors.YELLOW + "  ⚙ Processes:     " + Colors.RESET + Colors.BRIGHT_YELLOW + 
+                          String.format("%-65s", numProcesses) + 
+                          Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET + 
+                          Colors.YELLOW + "  ⏱ Time Quantum:  " + Colors.RESET + Colors.BRIGHT_YELLOW + 
+                          String.format("%-65s", timeQuantum + "ms") + 
+                          Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET + 
+                          Colors.YELLOW + "  🔑 Student ID:    " + Colors.RESET + Colors.BRIGHT_YELLOW + 
+                          String.format("%-65s", studentID) + 
+                          Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET + 
+                          Colors.YELLOW + "  🔒 Sync Mode:     " + Colors.RESET + Colors.BRIGHT_YELLOW + 
+                          String.format("%-65s", "Fine-Grained Locks & Semaphores") + 
+                          Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + 
+                          "╚═══════════════════════════════════════════════════════════════════════════════════════╝" + 
+                          Colors.RESET + "\n");
+        
+        for (int i = 1; i <= numProcesses; i++) {
+            int burstTime = timeQuantum/2 + random.nextInt(2 * timeQuantum + 1);
+            int priority = 1 + random.nextInt(5);
+            
+            Process process = new Process("P" + i, burstTime, timeQuantum, priority);
+            allProcesses.add(process);
+            addProcessToQueue(process, processQueue, processMap);
+        }
+        
+        System.out.println(Colors.BOLD + Colors.GREEN + 
+                          "╔════════════════════════════════════════════════════════════════════════════════╗" + 
+                          Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.GREEN + "║" + Colors.RESET + 
+                          Colors.BG_GREEN + Colors.WHITE + Colors.BOLD + 
+                          "                        ▶  SCHEDULER STARTING  ◀                               " + 
+                          Colors.RESET + Colors.BOLD + Colors.GREEN + "║" + Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.GREEN + 
+                          "╚════════════════════════════════════════════════════════════════════════════════╝" + 
+                          Colors.RESET + "\n");
+        
+        while (!processQueue.isEmpty()) {
+            Thread currentThread = processQueue.poll();
+            
+            System.out.println(Colors.BOLD + Colors.MAGENTA + "┌─ Ready Queue " + "─".repeat(65) + Colors.RESET);
+            System.out.print(Colors.MAGENTA + "│ " + Colors.RESET + Colors.BRIGHT_WHITE + "[" + Colors.RESET);
+            int queueCount = 0;
+            for (Thread thread : processQueue) {
+                Process process = processMap.get(thread);
+                if (queueCount > 0) System.out.print(Colors.WHITE + " → " + Colors.RESET);
+                System.out.print(Colors.BRIGHT_CYAN + process.getName() + Colors.RESET);
+                queueCount++;
+            }
+            if (queueCount == 0) {
+                System.out.print(Colors.YELLOW + "empty" + Colors.RESET);
+            }
+            System.out.println(Colors.BRIGHT_WHITE + "]" + Colors.RESET);
+            System.out.println(Colors.BOLD + Colors.MAGENTA + "└" + "─".repeat(79) + Colors.RESET + "\n");
+            
+            currentThread.start();
+            
+            try {
+                currentThread.join();
+            } catch (InterruptedException e) {
+                System.out.println("Main thread interrupted.");
+            }
+            
+            Process process = processMap.get(currentThread);
             
             if (!process.isFinished()) {
                 if (!processQueue.isEmpty()) {
@@ -346,7 +526,6 @@ public class SchedulerSimulationSync {
             }
         }
         
-        // Print statistics
         printStatistics(allProcesses, timeQuantum);
     }
     
@@ -375,7 +554,6 @@ public class SchedulerSimulationSync {
                           "╚════════════════════════════════════════════════════════════════════════════════╝" + 
                           Colors.RESET + "\n");
         
-        // Print synchronization statistics
         System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "═══ Synchronization Statistics ═══" + Colors.RESET);
         System.out.println(Colors.YELLOW + "Total Context Switches: " + Colors.BRIGHT_YELLOW + 
                           SharedResources.contextSwitchCount + Colors.RESET);
@@ -387,7 +565,6 @@ public class SchedulerSimulationSync {
                           (SharedResources.totalWaitingTime / processes.size()) + "ms" + Colors.RESET);
         System.out.println();
         
-        // Print process summary table
         System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "═══ Process Summary Table ═══" + Colors.RESET);
         System.out.println(Colors.BOLD + String.format("%-10s %-12s %-12s %-12s", 
                           "Process", "Priority", "Burst Time", "Waiting Time") + Colors.RESET);
@@ -399,7 +576,6 @@ public class SchedulerSimulationSync {
         }
         System.out.println();
         
-        // Show execution log summary
         System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "═══ Execution Log Summary ═══" + Colors.RESET);
         System.out.println(Colors.YELLOW + "Total log entries: " + Colors.BRIGHT_YELLOW + 
                           SharedResources.executionLog.size() + Colors.RESET);
