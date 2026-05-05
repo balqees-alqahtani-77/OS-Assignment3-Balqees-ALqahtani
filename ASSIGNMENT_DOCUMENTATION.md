@@ -31,42 +31,42 @@
 
 Document your development process with **minimum 3 entries** showing progression:
 
-### Entry 1 - [Date, Time]
-**What I implemented**: 
+### Entry 1 - Tuesday, April 28, 2026 - 6:00 PM
+**What I implemented**: Added ReentrantLock to protect shared variables  
 
-**Challenges encountered**: 
+**Challenges encountered**: Race condition issues  
 
-**How I solved it**: 
+**How I solved it**: Used lock with try-finally  
 
-**Testing approach**: 
+**Testing approach**: Ran program multiple times  
 
-**Time spent**: 
-
----
-
-### Entry 2 - [Date, Time]
-**What I implemented**: 
-
-**Challenges encountered**: 
-
-**How I solved it**: 
-
-**Testing approach**: 
-
-**Time spent**: 
+**Time spent**: 1 hour  
 
 ---
 
-### Entry 3 - [Date, Time]
-**What I implemented**: 
+### Entry 2 - Thursday, April 30, 2026 - 7:30 PM
+**What I implemented**: Protected execution log using lock  
 
-**Challenges encountered**: 
+**Challenges encountered**: ConcurrentModificationException  
 
-**How I solved it**: 
+**How I solved it**: Locked ArrayList during modification  
 
-**Testing approach**: 
+**Testing approach**: Tested concurrent read/write  
 
-**Time spent**: 
+**Time spent**: 1 hour  
+
+---
+
+### Entry 3 - Saturday, May 2, 2026 - 5:00 PM
+**What I implemented**: Added Semaphore for CPU control  
+
+**Challenges encountered**: Managing concurrent access  
+
+**How I solved it**: Used binary semaphore  
+
+**Testing approach**: Ran with multiple threads  
+
+**Time spent**: 1 hour
 
 ---
 
@@ -216,34 +216,38 @@ Document your development process with **minimum 3 entries** showing progression
 
 ### Test 2: Exception Testing
 **What I tested**: Checking for ConcurrentModificationException
+**Testing procedure**: Run program multiple times with threads  
 
-**Testing procedure**: 
+**Results**: Consistent outputs  
 
-**Results**: 
+**What this proves**: Synchronization works correctly  
 
-**What this proves**: 
 
 ---
 
 ### Test 3: Correctness Verification
-**What I tested**: Verifying correct final values (total burst time, context switches, etc.)
 
-**Expected values**: 
+**What I tested**: Verifying correct final values  
 
-**Actual values**: 
+**Expected values**: Stable and correct results  
 
-**Analysis**: 
+**Actual values**: Matched expected  
+
+**Analysis**: No data inconsistency  
+
 
 ---
 
 ### Test 4: Different Scenarios
-**Scenario tested**: [e.g., different time quantum, more processes, etc.]
 
-**Purpose**: 
+**Scenario tested**: More processes and different time quantum  
 
-**Results**: 
+**Purpose**: Check stability under changes  
 
-**What I learned**: 
+**Results**: Program remained correct  
+
+**What I learned**: Synchronization handles variations  
+
 
 ---
 
@@ -251,53 +255,70 @@ Document your development process with **minimum 3 entries** showing progression
 
 ### What I learned about synchronization:
 
-[6-8 sentences about key concepts, challenges, insights]
+Synchronization prevents race conditions and ensures correct data sharing.  
+
+Locks and semaphores control thread access.  
+
+Without it, results become unpredictable.  
+
+It improves program stability.  
+
 
 ---
 
 ### Real-world applications:
 
-Give TWO examples where synchronization is critical:
+**Example 1**: Bank systems (account balance updates)  
 
-**Example 1**: 
+**Example 2**: Operating systems (CPU scheduling)  
 
-**Example 2**: 
 
 ---
 
 ### How I would explain synchronization to others:
 
-[Explain to someone who just finished Assignment 1 - use simple terms and analogies]
+It’s like one key for a room—only one person enters at a time to avoid conflicts.  
+
 
 ---
 
 ## Part 6: GitHub Repository Information
 
-**Repository URL**: 
+**Repository URL**: [your link]  
 
-**Number of commits**: 
+**Number of commits**: 4  
 
-**Commit messages**: 
-1. 
-2. 
-3. 
-4. 
+
+**Commit messages**:  
+
+1. Set student ID  
+
+2. Added ReentrantLock  
+
+3. Added Semaphore  
+
+4. Completed documentation  
+
 
 ---
 
 ## Summary
 
-**Total time spent on assignment**: 
+**Total time spent on assignment**: 3 hours  
 
-**Key takeaways**: 
-1. 
-2. 
-3. 
 
-**Most challenging aspect**: 
+**Key takeaways**:  
 
-**What I'm most proud of**: 
+1. Avoid race conditions  
 
----
+2. Use locks correctly  
+
+3. Test multiple times  
+
+
+**Most challenging aspect**: Debugging threads  
+
+
+**What I'm most proud of**: Correct synchronization implementation
 
 **End of Documentation**
