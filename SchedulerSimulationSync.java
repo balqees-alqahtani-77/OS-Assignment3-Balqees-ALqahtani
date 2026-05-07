@@ -240,7 +240,7 @@ class Process implements Runnable {
 public class SchedulerSimulationSync {
     public static void main(String[] args) {
         // ⚠️ IMPORTANT: Put your student ID here
-        int studentID = 445052134;  // ← CHANGE THIS TO YOUR ACTUAL STUDENT ID
+        int studentID =  445052134;  // ← CHANGE THIS TO YOUR ACTUAL STUDENT ID
         
         Random random = new Random(studentID);
         
